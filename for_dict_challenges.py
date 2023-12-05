@@ -108,6 +108,32 @@ is_male = {
     "Даша": False,
 }
 
+
+def check_gender(name: str) -> bool:
+    return is_male[name]
+
+
+def gender_count(
+    school_class: list[dict], female_only: bool = False, male_only: bool = False
+):
+    male = 0
+    female = 0
+    for student in school_class["students"]:
+        if check_gender(student["first_name"]):
+            male += 1
+        else:
+            female += 1
+    if female_only:
+        return female
+    elif male_only:
+        return male
+    else:
+        return f'{school_class["class"]}: {female=}, {male=}'
+
+
+for school_class in school:
+    print(gender_count(school_class))
+
 # Задание 5
 # По информации об учениках разных классов нужно найти класс, в котором больше всего девочек и больше всего мальчиков
 # Пример вывода:
@@ -124,4 +150,14 @@ is_male = {
     "Олег": True,
     "Миша": True,
 }
-# ???
+female_max = 0
+male_max = 0
+for school_class in school:
+    if gender_count(school_class, female_only=True) > female_max:
+        female_max = gender_count(school_class, female_only=True)
+        female_max_class = school_class["class"]
+    if gender_count(school_class, male_only=True) > male_max:
+        male_max = gender_count(school_class, male_only=True)
+        male_max_class = school_class["class"]
+print(f"the most girls ({female_max}) are in class {female_max_class}")
+print(f"the most boys ({male_max}) are in class {male_max_class}")
