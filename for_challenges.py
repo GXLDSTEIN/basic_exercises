@@ -45,8 +45,8 @@ groups = [
 ]
 
 print(f"всего {len(groups)} групп.")
-for i, group in enumerate(groups):
-    print(f"Группа {i+1}: {len(group)} ученика")
+for i, group in enumerate(groups, start=1):
+    print(f"Группа {i}: {len(group)} ученика")
 
 # Задание 5
 # Для каждой пары учеников нужно с новой строки перечислить учеников, которые в неё входят
