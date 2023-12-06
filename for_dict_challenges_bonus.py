@@ -39,32 +39,74 @@ import lorem
 
 def generate_chat_history():
     messages_amount = random.randint(200, 1000)
-    users_ids = list(
-        {random.randint(1, 10000) for _ in range(random.randint(5, 20))}
-    )
+    users_ids = list({random.randint(1, 10000) for _ in range(random.randint(5, 20))})
     sent_at = datetime.datetime.now() - datetime.timedelta(days=100)
     messages = []
     for _ in range(messages_amount):
         sent_at += datetime.timedelta(minutes=random.randint(0, 240))
-        messages.append({
-            "id": uuid.uuid4(),
-            "sent_at": sent_at,
-            "sent_by": random.choice(users_ids),
-            "reply_for": random.choice(
-                [
-                    None,
-                    (
-                        random.choice([m["id"] for m in messages])
-                        if messages else None
-                    ),
-                ],
-            ),
-            "seen_by": random.sample(users_ids,
-                                     random.randint(1, len(users_ids))),
-            "text": lorem.sentence(),
-        })
+        messages.append(
+            {
+                "id": uuid.uuid4(),
+                "sent_at": sent_at,
+                "sent_by": random.choice(users_ids),
+                "reply_for": random.choice(
+                    [
+                        None,
+                        (
+                            random.choice([m["id"] for m in messages])
+                            if messages
+                            else None
+                        ),
+                    ],
+                ),
+                "seen_by": random.sample(users_ids, random.randint(1, len(users_ids))),
+                "text": lorem.sentence(),
+            }
+        )
     return messages
 
 
+def most_active_user(history: list[dict]) -> int | None:
+    duplicates = {}
+    for message in history:
+        if message["sent_by"] not in duplicates:
+            duplicates[message["sent_by"]] = 0
+        else:
+            duplicates[message["sent_by"]] += 1
+    for key, value in duplicates.items():
+        if value == max(duplicates.values()):
+            return key
+    return None
+
+
+def unique_users(history: list[dict]) -> list[int]:
+    l = []
+    for message in history:
+        if message["sent_by"] not in l:
+            l.append(message["sent_by"])
+    return l
+
+
+def most_replied_user(history: list[dict]) -> int | None:
+    user_and_replies = dict.fromkeys(unique_users(history), 0)
+    all_replies = []
+    # get "reply_for" uuid from every message and add to all_replies list:
+    for message in history:
+        all_replies.append(str(message["reply_for"]))
+    # count and remove replies for every message:
+    for message in history:
+        message_id = str(message["id"])
+        if message_id in all_replies:
+            user_and_replies[message["sent_by"]] = all_replies.count(message_id)
+            all_replies = [i for i in all_replies if i != message_id]
+    # return most replied user:
+    for key, value in user_and_replies.items():
+        if value == max(user_and_replies.values()):
+            return key
+    return None
+
+
 if __name__ == "__main__":
-    print(generate_chat_history())
+    history = generate_chat_history()
+    print("user who sent the most messages:", most_active_user(history))
+    print("most replied user:", most_replied_user(history))
